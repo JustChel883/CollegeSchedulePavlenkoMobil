@@ -1,4 +1,4 @@
-package com.example.collegeschedulepavlenkomobil.utils
+package com.example.collegeschedulepavlenkomobil.ui.schedule
 
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -10,7 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.example.collegeschedulepavlenkomobil.data.dto.ScheduleByDateDto
 import com.example.collegeschedulepavlenkomobil.data.network.RetrofitInstance
-import com.example.collegeschedulepavlenkomobil.ui.schedule.ScheduleList
 import com.example.collegeschedulepavlenkomobil.utils.getWeekDateRange
 
 @Composable
