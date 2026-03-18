@@ -13,9 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -26,10 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.collegeschedulepavlenkomobil.data.dto.LessonDto
-import com.example.collegeschedulepavlenkomobil.data.dto.LessonGroupPart
 import com.example.collegeschedulepavlenkomobil.data.dto.ScheduleByDateDto
+import com.example.collegeschedulepavlenkomobil.data.dto.LessonGroupPart
 
 @Composable
 fun ScheduleList(data: List<ScheduleByDateDto>) {
@@ -37,16 +37,25 @@ fun ScheduleList(data: List<ScheduleByDateDto>) {
         items(data) { day ->
 
             Text(
-                text = "${day.lessonDate} (${day.weekday})",
+                text = day.lessonDate,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(16.dp, 12.dp, 16.dp, 0.dp)
+            )
+            Text(
+                text = day.weekday,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(16.dp, 0.dp, 16.dp, 8.dp)
             )
 
             if (day.lessons.isEmpty()) {
                 Text(
                     text = "Занятий нет",
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(start = 16.dp, bottom = 12.dp)
+                    modifier = Modifier.padding(16.dp, 0.dp, 0.dp, 12.dp)
                 )
             } else {
                 day.lessons.forEach { lesson ->
@@ -59,15 +68,14 @@ fun ScheduleList(data: List<ScheduleByDateDto>) {
 
 @Composable
 fun LessonCard(lesson: LessonDto) {
-
     val buildingColor = getBuildingColor(lesson.building)
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(16.dp, 4.dp, 16.dp, 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = buildingColor.copy(alpha = 0.2f) // полупрозрачный фон
+            containerColor = buildingColor.copy(alpha = 0.2f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -81,21 +89,30 @@ fun LessonCard(lesson: LessonDto) {
                 Icon(
                     imageVector = getLessonIcon(lesson),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(28.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Пара ${lesson.lessonNumber} • ${lesson.time}",
-                    style = MaterialTheme.typography.titleMedium
+                    text = "Пара ${lesson.lessonNumber}",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = lesson.time ?: "??",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Normal
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-
-            if (lesson.groupParts.size == 1 && lesson.groupParts.containsKey(LessonGroupPart.FULL)) {
-                // Общее занятие
+            // Детали занятия
+            if (lesson.groupParts?.size == 1 && lesson.groupParts.containsKey(LessonGroupPart.FULL)) {
                 val info = lesson.groupParts[LessonGroupPart.FULL]
                 if (info != null) {
                     LessonDetailRow(
@@ -107,8 +124,7 @@ fun LessonCard(lesson: LessonDto) {
                     )
                 }
             } else {
-                // Занятие с подгруппами
-                lesson.groupParts.forEach { (part, info) ->
+                lesson.groupParts?.forEach { (part, info) ->
                     if (info != null) {
                         LessonDetailRow(
                             partName = part.name,
@@ -127,45 +143,43 @@ fun LessonCard(lesson: LessonDto) {
 @Composable
 fun LessonDetailRow(
     partName: String,
-    subject: String,
-    teacher: String,
-    classroom: String,
-    building: String
+    subject: String?,
+    teacher: String?,
+    classroom: String?,
+    building: String?
 ) {
     Column(
-        modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+        modifier = Modifier.padding(8.dp, 4.dp, 0.dp, 0.dp)
     ) {
         Text(
-            text = if (partName != "Все") "[$partName] $subject" else subject,
-            style = MaterialTheme.typography.bodyLarge
+            text = if (partName != "Все") "[$partName] ${subject ?: "Нет данных"}" else subject ?: "Нет данных",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium
+            )
         )
         Text(
-            text = teacher,
-            style = MaterialTheme.typography.bodyMedium,
+            text = teacher ?: "Преподаватель не указан",
+            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
-            text = "$building, ауд. $classroom",
-            style = MaterialTheme.typography.bodySmall,
+            text = "${building ?: "Корпус"} • ауд. ${classroom ?: "??"}",
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
-
 
 fun getLessonIcon(lesson: LessonDto): ImageVector {
-    return if (lesson.groupParts.size > 1) {
-
+    return if ((lesson.groupParts?.size ?: 0) > 1) {
         Icons.Default.People
     } else {
-
         Icons.Default.Book
     }
-
 }
 
-
-fun getBuildingColor(buildingName: String): Color {
+fun getBuildingColor(buildingName: String?): Color {
     return when (buildingName) {
         "Главный корпус" -> Color(0xFFBBDEFB)
         "Лабораторный корпус" -> Color(0xFFC8E6C9)
