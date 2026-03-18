@@ -24,10 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.collegeschedulepavlenkomobil.data.api.ScheduleApi
 import com.example.collegeschedulepavlenkomobil.data.local.FavoritesManager
 import com.example.collegeschedulepavlenkomobil.data.repository.ScheduleRepository
 import com.example.collegeschedulepavlenkomobil.ui.schedule.ScheduleScreen
+import com.example.collegeschedulepavlenkomobil.ui.schedule.ScheduleViewModel
 import com.example.collegeschedulepavlenkomobil.ui.schedule.ScheduleViewModelFactory
 import com.example.collegeschedulepavlenkomobil.ui.theme.CollegeScheduleTheme
 import retrofit2.Retrofit
@@ -57,7 +59,11 @@ class MainActivity : ComponentActivity() {
 
                 val viewModelFactory = remember { ScheduleViewModelFactory(repository, favoritesManager) }
 
-                CollegeScheduleApp(viewModelFactory)
+
+                val scheduleViewModel: ScheduleViewModel = viewModel(factory = viewModelFactory)
+
+
+                CollegeScheduleApp(scheduleViewModel)
             }
         }
     }
@@ -65,7 +71,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun CollegeScheduleApp(
-    viewModelFactory: ScheduleViewModelFactory
+    scheduleViewModel: ScheduleViewModel
 ) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
@@ -88,7 +94,7 @@ fun CollegeScheduleApp(
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
-                AppDestinations.HOME -> ScheduleScreen(viewModelFactory)
+                AppDestinations.HOME -> ScheduleScreen(viewModel = scheduleViewModel)
                 AppDestinations.FAVORITES -> Text(
                     text = "Избранные группы",
                     modifier = Modifier.padding(innerPadding)
@@ -110,7 +116,6 @@ enum class AppDestinations(
     FAVORITES("Favorites", Icons.Default.Favorite),
     PROFILE("Profile", Icons.Default.AccountBox),
 }
-
 
 @PreviewScreenSizes
 @Composable
