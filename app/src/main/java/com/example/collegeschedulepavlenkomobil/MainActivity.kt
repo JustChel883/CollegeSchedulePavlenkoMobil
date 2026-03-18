@@ -22,8 +22,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import com.example.collegeschedulepavlenkomobil.data.api.ScheduleApi
+import com.example.collegeschedulepavlenkomobil.data.local.FavoritesManager
 import com.example.collegeschedulepavlenkomobil.data.repository.ScheduleRepository
 import com.example.collegeschedulepavlenkomobil.ui.schedule.ScheduleScreen
 import com.example.collegeschedulepavlenkomobil.ui.schedule.ScheduleViewModelFactory
@@ -37,6 +39,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CollegeScheduleTheme {
+                val context = LocalContext.current
+
 
                 val retrofit = remember {
                     Retrofit.Builder()
@@ -46,8 +50,12 @@ class MainActivity : ComponentActivity() {
                 }
                 val api = remember { retrofit.create(ScheduleApi::class.java) }
                 val repository = remember { ScheduleRepository(api) }
-                val viewModelFactory = remember { ScheduleViewModelFactory(repository) }
 
+
+                val favoritesManager = remember { FavoritesManager(context) }
+
+
+                val viewModelFactory = remember { ScheduleViewModelFactory(repository, favoritesManager) }
 
                 CollegeScheduleApp(viewModelFactory)
             }
@@ -108,7 +116,6 @@ enum class AppDestinations(
 @Composable
 fun PreviewCollegeScheduleApp() {
     CollegeScheduleTheme {
-
         Text("Заглушка")
     }
 }
