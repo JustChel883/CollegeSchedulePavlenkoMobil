@@ -2,15 +2,23 @@ package com.example.collegeschedulepavlenkomobil.ui.schedule
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -23,17 +31,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.collectAsState
 import com.example.collegeschedulepavlenkomobil.data.dto.GroupDto
 
 @Composable
 fun ScheduleScreen(
-    viewModelFactory: ScheduleViewModelFactory
+    viewModel: ScheduleViewModel,
+    onNavigateToFavorites: () -> Unit = {}
 ) {
-
-    val viewModel: ScheduleViewModel = viewModel(factory = viewModelFactory)
-
 
     val groups by viewModel.groups.collectAsState()
     val selectedGroup by viewModel.selectedGroup.collectAsState()
@@ -41,6 +46,7 @@ fun ScheduleScreen(
     val isLoadingGroups by viewModel.isLoadingGroups.collectAsState()
     val isLoadingSchedule by viewModel.isLoadingSchedule.collectAsState()
     val error by viewModel.error.collectAsState()
+    val favoriteGroupNames by viewModel.favoriteGroupNames.collectAsState()
 
     Column(
         modifier = Modifier
@@ -48,12 +54,32 @@ fun ScheduleScreen(
             .padding(16.dp)
     ) {
 
-        GroupSelector(
-            groups = groups,
-            selectedGroup = selectedGroup,
-            onGroupSelected = { viewModel.selectGroup(it) },
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
-        )
+        ) {
+
+            GroupSelector(
+                groups = groups,
+                selectedGroup = selectedGroup,
+                onGroupSelected = { viewModel.selectGroup(it) },
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            selectedGroup?.let { group ->
+                val isFavorite = group.name in favoriteGroupNames
+                IconButton(
+                    onClick = { viewModel.toggleFavorite(group.name) }
+                ) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = if (isFavorite) "Удалить из избранного" else "Добавить в избранное",
+                        tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -105,7 +131,6 @@ fun GroupSelector(
             value = searchText,
             onValueChange = {
                 searchText = it
-
             },
             readOnly = false,
             placeholder = { Text("Введите название группы") },
@@ -113,7 +138,6 @@ fun GroupSelector(
             modifier = modifier
                 .menuAnchor()
                 .onFocusChanged { focusState ->
-
                     expanded = focusState.isFocused && groups.isNotEmpty()
                 }
         )
