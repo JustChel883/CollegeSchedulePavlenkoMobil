@@ -32,6 +32,13 @@ import com.example.collegeschedulepavlenkomobil.data.dto.LessonGroupPart
 import com.example.collegeschedulepavlenkomobil.utils.formatHumanReadableDate
 import androidx.compose.foundation.layout.height
 
+
+fun LessonGroupPart.toDisplayName(): String = when (this) {
+    LessonGroupPart.FULL -> "Все"
+    LessonGroupPart.SUB1 -> "Подгруппа 1"
+    LessonGroupPart.SUB2 -> "Подгруппа 2"
+}
+
 @Composable
 fun ScheduleList(data: List<ScheduleByDateDto>) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -105,15 +112,15 @@ fun LessonCard(lesson: LessonDto) {
                 Text(
                     text = lesson.time ?: "??",
                     style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Normal
+                        fontWeight = FontWeight.Medium
                     ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Детали занятия
+
             if (lesson.groupParts?.size == 1 && lesson.groupParts.containsKey(LessonGroupPart.FULL)) {
                 val info = lesson.groupParts[LessonGroupPart.FULL]
                 if (info != null) {
@@ -129,7 +136,7 @@ fun LessonCard(lesson: LessonDto) {
                 lesson.groupParts?.forEach { (part, info) ->
                     if (info != null) {
                         LessonDetailRow(
-                            partName = part.name,
+                            partName = part.toDisplayName(),
                             subject = info.subject,
                             teacher = info.teacher,
                             classroom = info.classroom,
