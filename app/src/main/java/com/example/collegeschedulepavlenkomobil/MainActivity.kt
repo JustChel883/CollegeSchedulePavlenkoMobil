@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import com.example.collegeschedulepavlenkomobil.data.api.ScheduleApi
 import com.example.collegeschedulepavlenkomobil.data.repository.ScheduleRepository
 import com.example.collegeschedulepavlenkomobil.ui.schedule.ScheduleScreen
+import com.example.collegeschedulepavlenkomobil.ui.schedule.ScheduleViewModelFactory
 import com.example.collegeschedulepavlenkomobil.ui.theme.CollegeScheduleTheme
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -36,26 +37,29 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CollegeScheduleTheme {
-                CollegeScheduleApp()
+
+                val retrofit = remember {
+                    Retrofit.Builder()
+                        .baseUrl("http://10.0.2.2:5239/")
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build()
+                }
+                val api = remember { retrofit.create(ScheduleApi::class.java) }
+                val repository = remember { ScheduleRepository(api) }
+                val viewModelFactory = remember { ScheduleViewModelFactory(repository) }
+
+
+                CollegeScheduleApp(viewModelFactory)
             }
         }
     }
 }
 
-@PreviewScreenSizes
 @Composable
-fun CollegeScheduleApp() {
+fun CollegeScheduleApp(
+    viewModelFactory: ScheduleViewModelFactory
+) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-
-    val retrofit = remember {
-        Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:5239/") // localhost для Android Emulator
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    val api = remember { retrofit.create(ScheduleApi::class.java) }
-    val repository = remember { ScheduleRepository(api) }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -76,9 +80,15 @@ fun CollegeScheduleApp() {
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
-                AppDestinations.HOME -> ScheduleScreen()
-                AppDestinations.FAVORITES -> Text("Избранные группы", modifier = Modifier.padding(innerPadding))
-                AppDestinations.PROFILE -> Text("Профиль студента", modifier = Modifier.padding(innerPadding))
+                AppDestinations.HOME -> ScheduleScreen(viewModelFactory)
+                AppDestinations.FAVORITES -> Text(
+                    text = "Избранные группы",
+                    modifier = Modifier.padding(innerPadding)
+                )
+                AppDestinations.PROFILE -> Text(
+                    text = "Профиль студента",
+                    modifier = Modifier.padding(innerPadding)
+                )
             }
         }
     }
@@ -91,4 +101,14 @@ enum class AppDestinations(
     HOME("Home", Icons.Default.Home),
     FAVORITES("Favorites", Icons.Default.Favorite),
     PROFILE("Profile", Icons.Default.AccountBox),
+}
+
+
+@PreviewScreenSizes
+@Composable
+fun PreviewCollegeScheduleApp() {
+    CollegeScheduleTheme {
+
+        Text("Заглушка")
+    }
 }
