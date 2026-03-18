@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import com.example.collegeschedulepavlenkomobil.data.dto.LessonDto
 import com.example.collegeschedulepavlenkomobil.data.dto.ScheduleByDateDto
 import com.example.collegeschedulepavlenkomobil.data.dto.LessonGroupPart
+import com.example.collegeschedulepavlenkomobil.utils.formatHumanReadableDate
+import androidx.compose.foundation.layout.height
 
 @Composable
 fun ScheduleList(data: List<ScheduleByDateDto>) {
@@ -37,13 +38,14 @@ fun ScheduleList(data: List<ScheduleByDateDto>) {
         items(data) { day ->
 
             Text(
-                text = day.lessonDate,
+                text = formatHumanReadableDate(day.lessonDate),
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(16.dp, 12.dp, 16.dp, 0.dp)
             )
+
             Text(
                 text = day.weekday,
                 style = MaterialTheme.typography.titleLarge,
