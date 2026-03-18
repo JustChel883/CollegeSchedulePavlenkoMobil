@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.collegeschedulepavlenkomobil.data.api.ScheduleApi
 import com.example.collegeschedulepavlenkomobil.data.local.FavoritesManager
 import com.example.collegeschedulepavlenkomobil.data.repository.ScheduleRepository
+import com.example.collegeschedulepavlenkomobil.ui.favorites.FavoritesScreen
 import com.example.collegeschedulepavlenkomobil.ui.schedule.ScheduleScreen
 import com.example.collegeschedulepavlenkomobil.ui.schedule.ScheduleViewModel
 import com.example.collegeschedulepavlenkomobil.ui.schedule.ScheduleViewModelFactory
@@ -43,7 +44,6 @@ class MainActivity : ComponentActivity() {
             CollegeScheduleTheme {
                 val context = LocalContext.current
 
-
                 val retrofit = remember {
                     Retrofit.Builder()
                         .baseUrl("http://10.0.2.2:5239/")
@@ -53,15 +53,11 @@ class MainActivity : ComponentActivity() {
                 val api = remember { retrofit.create(ScheduleApi::class.java) }
                 val repository = remember { ScheduleRepository(api) }
 
-
                 val favoritesManager = remember { FavoritesManager(context) }
-
 
                 val viewModelFactory = remember { ScheduleViewModelFactory(repository, favoritesManager) }
 
-
                 val scheduleViewModel: ScheduleViewModel = viewModel(factory = viewModelFactory)
-
 
                 CollegeScheduleApp(scheduleViewModel)
             }
@@ -95,9 +91,9 @@ fun CollegeScheduleApp(
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
                 AppDestinations.HOME -> ScheduleScreen(viewModel = scheduleViewModel)
-                AppDestinations.FAVORITES -> Text(
-                    text = "Избранные группы",
-                    modifier = Modifier.padding(innerPadding)
+                AppDestinations.FAVORITES -> FavoritesScreen(
+                    viewModel = scheduleViewModel,
+                    onNavigateToHome = { currentDestination = AppDestinations.HOME }
                 )
                 AppDestinations.PROFILE -> Text(
                     text = "Профиль студента",
